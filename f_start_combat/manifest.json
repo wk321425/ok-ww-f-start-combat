@@ -1,0 +1,8 @@
+{
+  "file_name": "f_start_combat",
+  "script_name": "F 开始战斗",
+  "version": "1.0.0",
+  "tasks": [
+    ["FStartCombat", "FStartCombatTask"]
+  ]
+}
