@@ -6,7 +6,33 @@ from ok import Logger, TriggerTask
 
 logger = Logger.get_logger(__name__)
 
-PLUGIN_VERSION = '1.0.0'
+PLUGIN_VERSION = '1.0.1'
+
+
+def _fix_imported_task_tab():
+    """ok-script 2.1 起插件任务页继承 TasksPage, 名字写死成 "TasksPage", 和主任务页撞导航 key, 主窗口起不来。
+
+    插件任务模块在建主窗口之前导入, 这里给它补个按插件区分的名字。两个插件都带这段, 只包一层。
+    """
+    try:
+        from ok.ui.qt.plugins import imported_tabs
+    except Exception:
+        return  # 旧版没有这个模块
+    cls = getattr(imported_tabs, 'ImportedTaskTab', None)
+    if cls is None or getattr(cls.__init__, '_okww_unique_name', False):
+        return
+    original = cls.__init__
+
+    def __init__(self, namespace, *args, **kwargs):
+        original(self, namespace, *args, **kwargs)
+        if self.objectName() == 'TasksPage':
+            self.setObjectName(f'TasksPage_{namespace}')
+
+    __init__._okww_unique_name = True
+    cls.__init__ = __init__
+
+
+_fix_imported_task_tab()
 
 F_VK = 0x46
 F_POLL_INTERVAL = 0.05
